@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import { Link } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -43,62 +43,69 @@ const Orders = () => {
   };
 
   return (
-    <div>
+    <div className="container mt-4">
       <h1>Все заказы</h1>
-      <Form.Group controlId="statusFilter">
-        <Form.Label>Фильтр по статусу</Form.Label>
-        <Form.Control
-          as="select"
-          value={statusFilter}
-          onChange={(e) => filterByStatus(e.target.value)}
-        >
-          <option value="">Все</option>
-          <option value="0">Новый</option>
-          <option value="1">В обработке</option>
-          <option value="2">Отправлен</option>
-          <option value="3">Доставлен</option>
-          <option value="4">Завершен</option>
-        </Form.Control>
-      </Form.Group>
+      <div className="row mb-3">
+        <div className="col-md-6">
+          <Form.Group controlId="statusFilter">
+            <Form.Label>Фильтр по статусу</Form.Label>
+            <Form.Control
+              as="select"
+              value={statusFilter}
+              onChange={(e) => filterByStatus(e.target.value)}
+            >
+              <option value="">Все</option>
+              <option value="0">Новый</option>
+              <option value="1">В обработке</option>
+              <option value="2">Отправлен</option>
+              <option value="3">Доставлен</option>
+              <option value="4">Завершен</option>
+            </Form.Control>
+          </Form.Group>
+        </div>
 
-      <Form.Group controlId="sortOrder">
-        <Form.Label>Сортировка по сумме</Form.Label>
-        <Form.Control
-          as="select"
-          value={sortOrder}
-          onChange={(e) => sortOrdersByTotal(e.target.value)}
-        >
-          <option value="">Без сортировки</option>
-          <option value="asc">По возрастанию</option>
-          <option value="desc">По убыванию</option>
-        </Form.Control>
-      </Form.Group>
+        <div className="col-md-6">
+          <Form.Group controlId="sortOrder">
+            <Form.Label>Сортировка по сумме</Form.Label>
+            <Form.Control
+              as="select"
+              value={sortOrder}
+              onChange={(e) => sortOrdersByTotal(e.target.value)}
+            >
+              <option value="">Без сортировки</option>
+              <option value="asc">По возрастанию</option>
+              <option value="desc">По убыванию</option>
+            </Form.Control>
+          </Form.Group>
+        </div>
+      </div>
 
-      <ul>
+      <div className="row">
         {filteredOrders.map((order) => (
-          <Card
-            key={order.id}
-            style={{ width: '18rem', display: 'flex', margin: '1rem' }}
-          >
-            <Card.Body>
-              <Card.Title>
-                Заказ №{order.id} <br /> Статус: {getStatusText(order.status)}
-              </Card.Title>
-              <Card.Text>
-                Дата создания заказа:{' '}
-                {new Date(order.createdAt).toLocaleString()}
-              </Card.Text>
-              <Button variant="primary" onClick={() => setShowItems(order)}>
-                Показать все товары
-              </Button>
-            </Card.Body>
-            <Card.Footer>
-              Общая цена: {order.total} руб. Количество товаров:{' '}
-              {order.items.length} шт.
-            </Card.Footer>
-          </Card>
+          <div key={order.id} className="col-md-3 mb-4">
+            <Card className="h-100">
+              <Card.Body>
+                <Card.Title>
+                  Заказ №{order.id} <br /> Статус: {getStatusText(order.status)}
+                </Card.Title>
+                <Card.Text>
+                  Дата создания заказа:{' '}
+                  {new Date(order.createdAt).toLocaleString()}
+                </Card.Text>
+                <Button variant="primary" onClick={() => setShowItems(order)}>
+                  Показать все товары
+                </Button>
+              </Card.Body>
+              <Card.Footer>
+                <small className="text-muted">
+                  Общая цена: {order.total} руб. <br />
+                  Количество товаров: {order.items.length} шт.
+                </small>
+              </Card.Footer>
+            </Card>
+          </div>
         ))}
-      </ul>
+      </div>
 
       <Modal show={!!showItems} onHide={() => setShowItems(null)}>
         <Modal.Header closeButton>
