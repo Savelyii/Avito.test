@@ -12,6 +12,8 @@ const Orders = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [sortOrder, setSortOrder] = useState('');
   const [showItems, setShowItems] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
 
   useEffect(() => {
     fetch('http://localhost:3000/orders')
@@ -40,6 +42,32 @@ const Orders = () => {
       order === 'asc' ? a.total - b.total : b.total - a.total
     );
     setFilteredOrders(sorted);
+  };
+
+  const completeOrder = (orderId) => {
+    setSelectedOrderId(orderId);
+    setShowConfirmModal(true);
+  };
+
+  const confirmCompleteOrder = () => {
+    fetch(`http://localhost:3000/orders/${selectedOrderId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ status: 4 }),
+    })
+      .then((response) => response.json())
+      .then(() => {
+        setFilteredOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order.id === selectedOrderId ? { ...order, status: 4 } : order
+          )
+        );
+        setShowConfirmModal(false);
+        setSelectedOrderId(null);
+      })
+      .catch((error) => console.error('Ошибка завершения заказа:', error));
   };
 
   return (
@@ -101,6 +129,14 @@ const Orders = () => {
                   Общая цена: {order.total} руб. <br />
                   Количество товаров: {order.items.length} шт.
                 </small>
+                <Button
+                  variant="success"
+                  className="mt-2"
+                  onClick={() => completeOrder(order.id)}
+                  disabled={order.status === 4}
+                >
+                  Завершить заказ
+                </Button>
               </Card.Footer>
             </Card>
           </div>
@@ -124,6 +160,23 @@ const Orders = () => {
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowItems(null)}>
             Закрыть
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal show={showConfirmModal} onHide={() => setShowConfirmModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Подтверждение завершения заказа</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Вы уверены, что хотите завершить этот заказ?</Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setShowConfirmModal(false)}
+          >
+            Отмена
+          </Button>
+          <Button variant="success" onClick={confirmCompleteOrder}>
+            Завершить заказ
           </Button>
         </Modal.Footer>
       </Modal>
