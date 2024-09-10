@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Form, Button, Card, Row, Col, Pagination } from 'react-bootstrap';
+import {
+  Form,
+  Button,
+  Card,
+  Row,
+  Col,
+  Pagination,
+  Modal,
+} from 'react-bootstrap';
 
 const Ads = () => {
   const [ads, setAds] = useState([]);
@@ -8,6 +16,14 @@ const Ads = () => {
   const [limit, setLimit] = useState(10);
   const [page, setPage] = useState(1);
   const [totalAds, setTotalAds] = useState(ads.length);
+  const [showModal, setShowModal] = useState(false);
+  const [newAd, setNewAd] = useState({
+    imageUrl: '',
+    name: '',
+    description: '',
+    price: '',
+  });
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     let query = `http://localhost:3000/advertisements?_page=${page}&_limit=${limit}`;
@@ -35,8 +51,33 @@ const Ads = () => {
     setPage(1);
   };
 
+  const handleCreateAd = () => {
+    if (!newAd.imageUrl || !newAd.name || !newAd.description || !newAd.price) {
+      setErrorMessage('Пожалуйста, заполните все поля');
+      return;
+    }
+
+    fetch('http://localhost:3000/advertisements', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...newAd,
+        createdAt: new Date().toISOString(),
+        views: 0,
+        likes: 0,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setAds((prevAds) => [...prevAds, data]);
+        setShowModal(false);
+        setNewAd({ imageUrl: '', name: '', description: '', price: '' });
+        setErrorMessage('');
+      })
+      .catch((error) => console.error('Ошибка создания объявления:', error));
+  };
+
   const totalPages = Math.ceil(totalAds / limit);
-  console.log('totalPages: ', totalPages);
 
   return (
     <div className="container">
@@ -63,12 +104,29 @@ const Ads = () => {
         </Form.Control>
       </Form.Group>
 
+      <Button
+        variant="success"
+        className="mb-4"
+        onClick={() => setShowModal(true)}
+      >
+        Создать новое объявление
+      </Button>
+
       <Row>
         {ads.map((ad) => (
           <Col key={ad.id} md={4} className="mb-4">
             <Card>
               {ad.imageUrl && (
-                <Card.Img variant="top" src={ad.imageUrl} alt={ad.name} />
+                <Card.Img
+                  variant="top"
+                  src={ad.imageUrl}
+                  alt={ad.name}
+                  style={{
+                    width: '100%',
+                    height: '200px',
+                    objectFit: 'contain',
+                  }}
+                />
               )}
               <Card.Body>
                 <Card.Title>{ad.name}</Card.Title>
@@ -103,6 +161,70 @@ const Ads = () => {
           disabled={page === totalPages}
         />
       </Pagination>
+
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Создать новое объявление</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group controlId="imageUrl">
+              <Form.Label>URL изображения</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Введите ссылку на изображение"
+                value={newAd.imageUrl}
+                onChange={(e) =>
+                  setNewAd({ ...newAd, imageUrl: e.target.value })
+                }
+              />
+            </Form.Group>
+
+            <Form.Group controlId="name">
+              <Form.Label>Название</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Введите название"
+                value={newAd.name}
+                onChange={(e) => setNewAd({ ...newAd, name: e.target.value })}
+              />
+            </Form.Group>
+
+            <Form.Group controlId="description">
+              <Form.Label>Описание</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                placeholder="Введите описание"
+                value={newAd.description}
+                onChange={(e) =>
+                  setNewAd({ ...newAd, description: e.target.value })
+                }
+              />
+            </Form.Group>
+
+            <Form.Group controlId="price">
+              <Form.Label>Стоимость (руб.)</Form.Label>
+              <Form.Control
+                type="number"
+                placeholder="Введите стоимость"
+                value={newAd.price}
+                onChange={(e) => setNewAd({ ...newAd, price: e.target.value })}
+              />
+            </Form.Group>
+
+            {errorMessage && <p className="text-danger">{errorMessage}</p>}
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Закрыть
+          </Button>
+          <Button variant="primary" onClick={handleCreateAd}>
+            Создать
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

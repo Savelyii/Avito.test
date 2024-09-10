@@ -1,11 +1,12 @@
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { Form, Button } from 'react-bootstrap';
+import { Form, Button, Alert } from 'react-bootstrap';
 
 const Ad = () => {
   const { id } = useParams();
   const [ad, setAd] = useState(null);
-  const [editMode, setEditMode] = useState(false); // Режим редактирования
+  const [editMode, setEditMode] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     fetch(`http://localhost:3000/advertisements/${id}`)
@@ -19,7 +20,23 @@ const Ad = () => {
     setAd({ ...ad, [name]: value });
   };
 
+  const isValidUrl = (string) => {
+    try {
+      new URL(string);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const handleSubmit = () => {
+    if (!isValidUrl(ad.imageUrl)) {
+      setErrorMessage(
+        'Невалидный URL изображения. Пожалуйста, введите правильную ссылку.'
+      );
+      return;
+    }
+
     fetch(`http://localhost:3000/advertisements/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -29,6 +46,7 @@ const Ad = () => {
       .then((data) => {
         setAd(data);
         setEditMode(false);
+        setErrorMessage('');
       })
       .catch((error) => console.error('Ошибка обновления объявления:', error));
   };
@@ -82,6 +100,8 @@ const Ad = () => {
             />
           </Form.Group>
 
+          {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
+
           <Button variant="primary" onClick={handleSubmit}>
             Сохранить
           </Button>
@@ -89,7 +109,15 @@ const Ad = () => {
       ) : (
         <div>
           {ad.imageUrl && (
-            <img src={ad.imageUrl} alt={ad.name} className="img-fluid mb-3" />
+            <img
+              src={ad.imageUrl}
+              alt={ad.name}
+              style={{
+                width: '100%',
+                height: '200px',
+                objectFit: 'contain',
+              }}
+            />
           )}
           <h1>{ad.name}</h1>
           <p>{ad.description}</p>
