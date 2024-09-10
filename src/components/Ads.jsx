@@ -13,9 +13,9 @@ import {
 const Ads = () => {
   const [ads, setAds] = useState([]);
   const [search, setSearch] = useState('');
-  const [limit, setLimit] = useState(10);
+  const [perPage, setPerPage] = useState(10);
   const [page, setPage] = useState(1);
-  const [totalAds, setTotalAds] = useState(ads.length);
+  const [totalAds, setTotalAds] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [newAd, setNewAd] = useState({
     imageUrl: '',
@@ -26,28 +26,28 @@ const Ads = () => {
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    let query = `http://localhost:3000/advertisements?_page=${page}&_limit=${limit}`;
+    let query = `http://localhost:3000/advertisements?_page=${page}&_per_page=${perPage}`;
 
     if (search) {
       query += `&name=${encodeURIComponent(search)}`;
     }
 
     fetch(query)
-      .then((response) => {
-        setTotalAds(Number(response.headers.get('X-Total-Count')));
-        return response.json();
+      .then((response) => response.json())
+      .then((data) => {
+        setTotalAds(data.items);
+        setAds(data.data || []);
       })
-      .then((data) => setAds(data))
       .catch((error) => console.error('Ошибка загрузки объявлений:', error));
-  }, [page, limit, search]);
+  }, [page, perPage, search]);
 
   const handleSearch = (e) => {
     setSearch(e.target.value);
     setPage(1);
   };
 
-  const handleLimitChange = (e) => {
-    setLimit(Number(e.target.value));
+  const handlePerPageChange = (e) => {
+    setPerPage(Number(e.target.value));
     setPage(1);
   };
 
@@ -77,7 +77,7 @@ const Ads = () => {
       .catch((error) => console.error('Ошибка создания объявления:', error));
   };
 
-  const totalPages = Math.ceil(totalAds / limit);
+  const totalPages = Math.ceil(totalAds / perPage);
 
   return (
     <div className="container">
@@ -95,9 +95,13 @@ const Ads = () => {
         </Form.Group>
       </Form>
 
-      <Form.Group controlId="limitSelect" className="mb-3">
+      <Form.Group controlId="perPageSelect" className="mb-3">
         <Form.Label>Количество объявлений на странице:</Form.Label>
-        <Form.Control as="select" value={limit} onChange={handleLimitChange}>
+        <Form.Control
+          as="select"
+          value={perPage}
+          onChange={handlePerPageChange}
+        >
           <option value={5}>5</option>
           <option value={10}>10</option>
           <option value={20}>20</option>
