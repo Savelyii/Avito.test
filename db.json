@@ -76,6 +76,33 @@
       "views": 200000,
       "likes": 302,
       "imageUrl": ""
+    },
+    {
+      "id": "9",
+      "name": "Квартира",
+      "price": 10,
+      "createdAt": "2024-08-12T12:16:55.351Z",
+      "views": 2000,
+      "likes": 30,
+      "imageUrl": ""
+    },
+    {
+      "id": "10",
+      "name": "Микрофон",
+      "price": 900,
+      "createdAt": "2024-08-12T12:16:55.351Z",
+      "views": 2010,
+      "likes": 2,
+      "imageUrl": ""
+    },
+    {
+      "id": "11",
+      "name": "Клавиатура",
+      "price": 7000,
+      "createdAt": "2024-08-12T12:16:55.351Z",
+      "views": 2400,
+      "likes": 3,
+      "imageUrl": ""
     }
   ],
   "orders": [
