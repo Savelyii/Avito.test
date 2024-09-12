@@ -112,7 +112,7 @@ const Orders = () => {
         {filteredOrders.map((order) => (
           <div key={order.id} className="col-md-3 mb-4">
             <Card className="h-100">
-              <Card.Body>
+              <Card.Body className="text-center">
                 <Card.Title>
                   Заказ №{order.id} <br /> Статус: {getStatusText(order.status)}
                 </Card.Title>
@@ -124,7 +124,7 @@ const Orders = () => {
                   Показать все товары
                 </Button>
               </Card.Body>
-              <Card.Footer>
+              <Card.Footer className="text-center">
                 <small className="text-muted">
                   Общая цена: {order.total} руб. <br />
                   Количество товаров: {order.items.length} шт.
@@ -151,8 +151,8 @@ const Orders = () => {
           {showItems?.items.map((item) => (
             <div key={item.id}>
               <p>
-                {item.name} - {item.count} шт.
-                <Link to={`/ad/${item.id}`}> Перейти к товару</Link>
+                {item.name} - {item.count} шт.&nbsp;
+                <Link to={`/ad/${item.id}`}>Перейти к товару</Link>
               </p>
             </div>
           ))}

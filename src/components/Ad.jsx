@@ -107,7 +107,16 @@ const Ad = () => {
           </Button>
         </Form>
       ) : (
-        <div>
+        <div
+          style={{
+            border: '1px solid #ccc',
+            borderRadius: '5px',
+            padding: '50px',
+            textAlign: 'center',
+            width: '600px',
+            margin: '0 auto',
+          }}
+        >
           {ad.imageUrl && (
             <img
               src={ad.imageUrl}

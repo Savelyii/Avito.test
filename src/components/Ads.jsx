@@ -12,6 +12,7 @@ import {
 
 const Ads = () => {
   const [ads, setAds] = useState([]);
+  const [filteredAds, setFilteredAds] = useState([]);
   const [search, setSearch] = useState('');
   const [perPage, setPerPage] = useState(10);
   const [page, setPage] = useState(1);
@@ -28,18 +29,26 @@ const Ads = () => {
   useEffect(() => {
     let query = `http://localhost:3000/advertisements?_page=${page}&_per_page=${perPage}`;
 
-    if (search) {
-      query += `&name=${encodeURIComponent(search)}`;
-    }
-
     fetch(query)
       .then((response) => response.json())
       .then((data) => {
         setTotalAds(data.items);
         setAds(data.data || []);
+        setFilteredAds(data.data || []);
       })
       .catch((error) => console.error('Ошибка загрузки объявлений:', error));
-  }, [page, perPage, search]);
+  }, [page, perPage]);
+
+  useEffect(() => {
+    if (search) {
+      const filtered = ads.filter((ad) =>
+        ad.name.toLowerCase().includes(search.toLowerCase())
+      );
+      setFilteredAds(filtered);
+    } else {
+      setFilteredAds(ads);
+    }
+  }, [search, ads]);
 
   const handleSearch = (e) => {
     setSearch(e.target.value);
@@ -81,14 +90,14 @@ const Ads = () => {
 
   return (
     <div className="container">
-      <h1 className="my-4">Все объявления</h1>
+      <h1 className="my-4 text-center">Все объявления</h1>
 
       <Form className="mb-3">
         <Form.Group controlId="search">
-          <Form.Label>Поиск по точному названию</Form.Label>
+          <Form.Label>Поиск по названию</Form.Label>
           <Form.Control
             type="text"
-            placeholder="Введите точное название"
+            placeholder="Введите название"
             value={search}
             onChange={handleSearch}
           />
@@ -117,33 +126,37 @@ const Ads = () => {
       </Button>
 
       <Row>
-        {ads.map((ad) => (
-          <Col key={ad.id} md={4} className="mb-4">
-            <Card>
-              {ad.imageUrl && (
-                <Card.Img
-                  variant="top"
-                  src={ad.imageUrl}
-                  alt={ad.name}
-                  style={{
-                    width: '100%',
-                    height: '200px',
-                    objectFit: 'contain',
-                  }}
-                />
-              )}
-              <Card.Body>
-                <Card.Title>{ad.name}</Card.Title>
-                <Card.Text>Цена: {ad.price} руб.</Card.Text>
-                <Card.Text>Просмотры: {ad.views}</Card.Text>
-                <Card.Text>Лайки: {ad.likes}</Card.Text>
-                <Link to={`/ad/${ad.id}`}>
-                  <Button variant="primary">Подробнее</Button>
-                </Link>
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
+        {filteredAds.length > 0 ? (
+          filteredAds.map((ad) => (
+            <Col key={ad.id} md={4} className="mb-4">
+              <Card>
+                {ad.imageUrl && (
+                  <Card.Img
+                    variant="top"
+                    src={ad.imageUrl}
+                    alt={ad.name}
+                    style={{
+                      width: '100%',
+                      height: '200px',
+                      objectFit: 'contain',
+                    }}
+                  />
+                )}
+                <Card.Body className="text-center">
+                  <Card.Title>{ad.name}</Card.Title>
+                  <Card.Text>Цена: {ad.price} руб.</Card.Text>
+                  <Card.Text>Просмотры: {ad.views}</Card.Text>
+                  <Card.Text>Лайки: {ad.likes}</Card.Text>
+                  <Link to={`/ad/${ad.id}`}>
+                    <Button variant="primary">Подробнее</Button>
+                  </Link>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))
+        ) : (
+          <p>Нет объявлений для отображения</p>
+        )}
       </Row>
 
       <Pagination className="justify-content-center">
